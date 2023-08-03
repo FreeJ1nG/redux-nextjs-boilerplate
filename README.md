@@ -55,13 +55,21 @@ This boilerplate is integrated with:
 
 - [Prettier](https://prettier.io/)
 
-  > `.prettierrc` configures the default prettier configuration of the project, this will make sure any use of auto formatting follow the prettier rules listed in the file
+  `.prettierrc` configures the default prettier configuration of the project, this will make sure any use of auto formatting follow the prettier rules listed in the file
 
 - [ESLint](https://eslint.org/)
 
-  > `.eslintrc.js` configures the rules that will be applied in the codebase. For example, each line has to end with a semicolon, and the linter will throw an error whenever this rule is not followed.
+  `.eslintrc.js` configures the rules that will be applied in the codebase. For example, each line has to end with a semicolon, and the linter will throw an error whenever this rule is not followed.
 
-  > Make sure you have the Eslint extension installed in your editor of choice :)
+  Make sure you have the Eslint extension installed in your editor of choice :)
+
+  In my VSCode user settings, i had to add the following line in order for VSCode to automatically fix the code to follow the ESLint rules:
+
+  ```json
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  ```
 
 ## Learn More
 
