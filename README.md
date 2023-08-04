@@ -37,15 +37,25 @@ Atomic design is a methodology for creating and managing user interfaces in a sy
 
 The atomic design system is composed of five distinct levels, each representing a different level of abstraction:
 
-Atoms: These are the basic building blocks of the UI, such as buttons, input fields, and icons. Atoms are small, reusable elements that cannot be broken down further.
+- Atoms
 
-Molecules: Molecules are combinations of atoms that work together as a functional unit, like a search bar or a navigation menu.
+  These are the basic building blocks of the UI, such as buttons, input fields, and icons. Atoms are small, reusable elements that cannot be broken down further.
 
-Organisms: Organisms are more complex components that combine multiple molecules and/or atoms to form a distinct section of the UI, like a header or a product card.
+- Molecules
 
-Templates: Templates are page-level layouts that define the overall structure and the placement of organisms on a page.
+  Molecules are combinations of atoms that work together as a functional unit, like a search bar or a navigation menu.
 
-Pages: Pages are the final implementation of the design, where specific content is added to the templates to create fully functional user interfaces.
+- Organisms
+
+  Organisms are more complex components that combine multiple molecules and/or atoms to form a distinct section of the UI, like a header or a product card.
+
+- Templates
+
+  Templates are page-level layouts that define the overall structure and the placement of organisms on a page.
+
+- Pages
+
+  Pages are the final implementation of the design, where specific content is added to the templates to create fully functional user interfaces.
 
 The atomic design system promotes consistency, reusability, and scalability in UI development. By breaking the design down into discrete components, developers and designers can easily maintain and modify the interface. It also fosters collaboration among team members as they can refer to the shared language of atoms, molecules, organisms, templates, and pages. Overall, atomic design helps create cohesive and user-friendly experiences across different digital products and platforms.
 
