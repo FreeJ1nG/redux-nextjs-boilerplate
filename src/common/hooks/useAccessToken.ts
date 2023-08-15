@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 
@@ -14,27 +15,31 @@ interface UseAccessTokenFeatures {
 export default function useAccessToken(): UseAccessTokenFeatures {
   const isMounted = useIsMounted();
   const router = useRouter();
-  const setAccessToken = (new_access_token: string) => {
+  const setAccessToken = useCallback((new_access_token: string) => {
     Cookies.set('access-token', new_access_token);
-  };
-  const forceGetAccessToken = () => {
+  }, []);
+  const forceGetAccessToken = useCallback(() => {
+    if (!isMounted) return '';
     if (Cookies.get('access-token')) {
       return Cookies.get('access-token') ?? '';
     }
     router.push(PATH_AUTH.login);
     return '';
-  };
-  const getAccessToken = () => {
+  }, [router, isMounted]);
+  const getAccessToken = useCallback(() => {
     return Cookies.get('access-token');
-  };
-  const removeAccessToken = () => {
+  }, []);
+  const removeAccessToken = useCallback(() => {
     Cookies.remove('access-token');
-  };
+  }, []);
 
-  return {
-    setAccessToken,
-    forceGetAccessToken: isMounted ? forceGetAccessToken : () => '',
-    getAccessToken,
-    removeAccessToken,
-  };
+  return useMemo(
+    () => ({
+      setAccessToken,
+      forceGetAccessToken,
+      getAccessToken,
+      removeAccessToken,
+    }),
+    [setAccessToken, forceGetAccessToken, getAccessToken, removeAccessToken],
+  );
 }
