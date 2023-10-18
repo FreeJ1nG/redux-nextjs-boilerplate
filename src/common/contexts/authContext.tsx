@@ -21,7 +21,7 @@ import {
 
 interface IAuthContext {
   login?: (
-    { email, password }: AuthFeature.LoginParam,
+    { username, password }: AuthFeature.LoginParam,
     errorHandler?: (err: string) => void,
   ) => void;
   register?: (
@@ -79,10 +79,10 @@ export function AuthContextProvider({ children }: ChildrenProps) {
 
   const login = useCallback(
     (
-      { email, password }: AuthFeature.LoginParam,
+      { username, password }: AuthFeature.LoginParam,
       errorHandler?: (err: string) => void,
     ) => {
-      loginUser({ payload: { email, password } })
+      loginUser({ payload: { username, password } })
         .unwrap()
         .then((resp) => {
           if (resp) {

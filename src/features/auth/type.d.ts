@@ -3,7 +3,7 @@ declare namespace AuthFeature {
     token: string;
   }
   interface LoginParam {
-    email: string;
+    username: string;
     password: string;
   }
   interface RegisterResponse {
