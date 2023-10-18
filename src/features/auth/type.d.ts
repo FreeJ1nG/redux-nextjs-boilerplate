@@ -10,9 +10,8 @@ declare namespace AuthFeature {
     token: string;
   }
   interface RegisterParam {
-    email: string;
+    username: string;
+    fullName: string;
     password: string;
-    firstname: string;
-    lastname: string;
   }
 }

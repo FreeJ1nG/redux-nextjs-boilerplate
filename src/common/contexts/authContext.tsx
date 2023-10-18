@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 
 import useAccessToken from '@/common/hooks/useAccessToken';
 import useIsMounted from '@/common/hooks/useIsMounted';
+import useToaster from '@/common/hooks/useToaster';
 import { PATH_AUTH, PATH_DASHBOARD } from '@/common/routes/path';
 import {
   useLazyGetUserQuery,
@@ -19,101 +20,115 @@ import {
 } from '@/features/auth/api';
 
 interface IAuthContext {
-  login?: ({ email, password }: AuthFeature.LoginParam) => void;
-  register?: ({
-    email,
-    password,
-    firstname,
-    lastname,
-  }: AuthFeature.RegisterParam) => void;
+  login?: (
+    { email, password }: AuthFeature.LoginParam,
+    errorHandler?: (err: string) => void,
+  ) => void;
+  register?: (
+    { username, fullName, password }: AuthFeature.RegisterParam,
+    errorHandler?: (err: string) => void,
+  ) => void;
   logout?: () => void;
-  isAuthenticated?: boolean;
-  email?: string;
-  firstname?: string;
-  lastname?: string;
-  role?: string;
-  active?: boolean;
+  isAuthenticated: boolean | null;
+  user: Models.User | null;
+  isMounted: boolean;
 }
 
-const AuthContext = createContext<IAuthContext | undefined>(undefined);
+const AuthContext = createContext<IAuthContext>({
+  login: () => {},
+  register: () => {},
+  logout: () => {},
+  isAuthenticated: null,
+  user: null,
+  isMounted: false,
+});
 
 export function AuthContextProvider({ children }: ChildrenProps) {
+  const toaster = useToaster();
   const router = useRouter();
   const isMounted = useIsMounted();
-  const [user, setUser] = useState<User | undefined>(undefined);
+  const [user, setUser] = useState<Models.User | null>(null);
   const [loginUser] = useLoginMutation();
   const [registerUser] = useRegisterMutation();
   const { getAccessToken, removeAccessToken, setAccessToken } =
     useAccessToken();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+  const [fetchUserData] = useLazyGetUserQuery();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
     Boolean(getAccessToken()),
   );
-  const [fetchUserData] = useLazyGetUserQuery();
 
   useEffect(() => {
     if (getAccessToken()) {
       fetchUserData({ accessToken: getAccessToken() })
         .unwrap()
-        .then((result) => {
-          setUser(result);
+        .then((resp) => {
+          if (resp.data) {
+            setUser(resp.data);
+          }
         })
         .catch((err) => {
-          alert(err);
-          // CHANGE ERROR HANDLING AS U WISH
+          toaster.launch({
+            color: 'error',
+            message: err.data.error,
+          });
         });
     } else {
-      setUser(undefined);
+      setUser(null);
     }
-  }, [isAuthenticated, fetchUserData, getAccessToken]);
+  }, [isAuthenticated, fetchUserData, getAccessToken, toaster]);
 
   const login = useCallback(
-    ({ email, password }: AuthFeature.LoginParam) => {
+    (
+      { email, password }: AuthFeature.LoginParam,
+      errorHandler?: (err: string) => void,
+    ) => {
       loginUser({ payload: { email, password } })
         .unwrap()
-        .then((result) => {
-          setAccessToken(result.token);
-          setIsAuthenticated(true);
-          router.push(PATH_DASHBOARD.root);
+        .then((resp) => {
+          if (resp) {
+            setAccessToken(resp.token);
+            setIsAuthenticated(true);
+            router.push(PATH_DASHBOARD.root);
+          }
         })
-        .catch((err) => {
-          alert(err);
-          // CHANGE ERROR HANDLING AS U WISH
-        });
+        .catch(errorHandler);
     },
     [loginUser, setAccessToken, router],
   );
 
   const register = useCallback(
-    ({ email, password, firstname, lastname }: AuthFeature.RegisterParam) => {
-      registerUser({ payload: { email, password, firstname, lastname } })
+    (
+      { username, fullName, password }: AuthFeature.RegisterParam,
+      errorHandler?: (err: string) => void,
+    ) => {
+      registerUser({ payload: { username, fullName, password } })
         .unwrap()
         .then(() => {
           router.push(PATH_AUTH.login);
         })
-        .catch((err) => {
-          alert(err);
-          // CHANGE ERROR HANDLING AS U WISH
-        });
+        .catch(errorHandler);
     },
     [registerUser, router],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await router.push(PATH_DASHBOARD.root);
     removeAccessToken();
     setIsAuthenticated(false);
-  }, [removeAccessToken, setIsAuthenticated]);
+  }, [removeAccessToken, router]);
 
   const authContextProviderValue = useMemo(
     () => ({
       ...(isMounted && {
-        user,
-        isAuthenticated,
         login,
         register,
         logout,
       }),
+      isAuthenticated,
+      user,
+      isMounted,
     }),
-    [isMounted, user, login, register, logout, isAuthenticated],
+    [isMounted, user, isAuthenticated, login, register, logout],
   );
 
   return (
